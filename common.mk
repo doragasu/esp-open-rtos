@@ -40,7 +40,7 @@ FLASH_SPEED ?= 40
 # Output directories to store intermediate compiled files
 # relative to the program directory
 BUILD_DIR ?= $(PROGRAM_DIR)build/
-FW_BASE ?= $(PROGRAM_DIR)firmware/
+FIRMWARE_DIR ?= $(PROGRAM_DIR)firmware/
 
 # esptool.py from https://github.com/themadinventor/esptool
 ESPTOOL ?= esptool.py
@@ -112,7 +112,7 @@ CXXFLAGS	?= $(C_CXX_FLAGS) -fno-exceptions -fno-rtti $(EXTRA_CXXFLAGS)
 # these aren't technically preprocesor args, but used by all 3 of C, C++, assembler
 CPPFLAGS	+= -mlongcalls -mtext-section-literals
 
-LDFLAGS		= -nostdlib -Wl,--no-check-sections -L$(BUILD_DIR)sdklib -L$(ROOT)lib -u $(ENTRY_SYMBOL) -Wl,-static -Wl,-Map=build/${PROGRAM}.map  $(EXTRA_LDFLAGS)
+LDFLAGS		= -nostdlib -Wl,--no-check-sections -L$(BUILD_DIR)sdklib -L$(ROOT)lib -u $(ENTRY_SYMBOL) -Wl,-static -Wl,-Map=$(BUILD_DIR)$(PROGRAM).map  $(EXTRA_LDFLAGS)
 
 ifeq ($(SPLIT_SECTIONS),1)
   C_CXX_FLAGS += -ffunction-sections -fdata-sections
@@ -134,7 +134,10 @@ else
     LDFLAGS += -g -O2
 endif
 
-GITSHORTREV=\"$(shell cd $(ROOT); git rev-parse --short -q HEAD)\"
+GITSHORTREV=\"$(shell cd $(ROOT); git rev-parse --short -q HEAD 2> /dev/null)\"
+ifeq ($(GITSHORTREV),\"\")
+  GITSHORTREV="\"(nogit)\"" # (same length as a short git hash)
+endif
 CPPFLAGS += -DGITSHORTREV=$(GITSHORTREV)
 
 ifeq ($(OTA),0)
@@ -173,11 +176,11 @@ ifeq ($(OTA),0)
 # these are the names and options to generate them
 FW_ADDR_1	= 0x00000
 FW_ADDR_2	= 0x20000
-FW_FILE_1    = $(addprefix $(FW_BASE),$(FW_ADDR_1).bin)
-FW_FILE_2    = $(addprefix $(FW_BASE),$(FW_ADDR_2).bin)
+FW_FILE_1    = $(addprefix $(FIRMWARE_DIR),$(FW_ADDR_1).bin)
+FW_FILE_2    = $(addprefix $(FIRMWARE_DIR),$(FW_ADDR_2).bin)
 else
 # for OTA, it's a single monolithic image
-FW_FILE = $(addprefix $(FW_BASE),$(PROGRAM).bin)
+FW_FILE = $(addprefix $(FIRMWARE_DIR),$(PROGRAM).bin)
 endif
 
 # firmware tool arguments
@@ -296,7 +299,7 @@ endef
 # - prefix all defined symbols with 'sdk_'
 # - weaken all global symbols so they can be overriden from the open SDK side
 #
-# SDK binary libraries are preprocessed into build/sdklib
+# SDK binary libraries are preprocessed into $(BUILD_DIR)/sdklib
 SDK_PROCESSED_LIBS = $(addsuffix .a,$(addprefix $(BUILD_DIR)sdklib/lib,$(SDK_LIBS)))
 
 # Make rules for preprocessing each SDK library
@@ -342,14 +345,14 @@ $(PROGRAM_OUT): $(COMPONENT_ARS) $(SDK_PROCESSED_LIBS) $(LINKER_SCRIPTS)
 	$(vecho) "LD $@"
 	$(Q) $(LD) $(LDFLAGS) -Wl,--start-group $(COMPONENT_ARS) $(LIB_ARGS) $(SDK_LIB_ARGS) -Wl,--end-group -o $@
 
-$(BUILD_DIR) $(FW_BASE) $(BUILD_DIR)sdklib:
+$(BUILD_DIR) $(FIRMWARE_DIR) $(BUILD_DIR)sdklib:
 	$(Q) mkdir -p $@
 
-$(FW_FILE_1) $(FW_FILE_2): $(PROGRAM_OUT) $(FW_BASE)
+$(FW_FILE_1) $(FW_FILE_2): $(PROGRAM_OUT) $(FIRMWARE_DIR)
 	$(vecho) "FW $@"
-	$(Q) $(ESPTOOL) elf2image $(ESPTOOL_ARGS) $< -o $(FW_BASE)
+	$(Q) $(ESPTOOL) elf2image $(ESPTOOL_ARGS) $< -o $(FIRMWARE_DIR)
 
-$(FW_FILE): $(PROGRAM_OUT) $(FW_BASE)
+$(FW_FILE): $(PROGRAM_OUT) $(FIRMWARE_DIR)
 	$(Q) $(IMGTOOL) $(IMGTOOL_ARGS) -bin -boot2 $(PROGRAM_OUT) $(FW_FILE) .text .data .rodata
 
 ifeq ($(OTA),0)
@@ -375,7 +378,7 @@ rebuild:
 
 clean:
 	$(Q) rm -rf $(BUILD_DIR)
-	$(Q) rm -rf $(FW_BASE)
+	$(Q) rm -rf $(FIRMWARE_DIR)
 
 # prevent "intermediate" files from being deleted
 .SECONDARY:
