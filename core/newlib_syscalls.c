@@ -36,18 +36,23 @@ IRAM caddr_t _sbrk_r (struct _reent *r, int incr)
 /* syscall implementation for stdio write to UART */
 long _write_r(struct _reent *r, int fd, const char *ptr, int len )
 {
-    if(fd != r->_stdout->_file) {
-        r->_errno = EBADF;
-        return -1;
-    }
-    for(int i = 0; i < len; i++) {
-        /* Auto convert CR to CRLF, ignore other LFs (compatible with Espressif SDK behaviour) */
-        if(ptr[i] == '\r')
-            continue;
-        if(ptr[i] == '\n')
-            uart_putc(PRINT_UART, '\r');
-        uart_putc(PRINT_UART, ptr[i]);
-    }
+	if (fd == r->_stdout->_file) {
+		for(int i = 0; i < len; i++) {
+		    /* Auto convert CR to CRLF, ignore other LFs (compatible with Espressif SDK behaviour) */
+		    if(ptr[i] == '\r')
+		        continue;
+		    if(ptr[i] == '\n')
+		        uart_putc(PRINT_UART, '\r');
+		    uart_putc(PRINT_UART, ptr[i]);
+		}
+	/* Not writing to STDOUT. If file number is in UART range, write to UART. Error otherwise */
+	} else if (fd > 1) {
+		r->_errno = EBADF;
+		return -1;
+	} else {
+		for (int i = 0; i < len; i++) uart_putc(fd, ptr[i]);
+	}
+
     return len;
 }
 
