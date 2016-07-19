@@ -73,6 +73,7 @@
 #include <malloc.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <xtensa_ops.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -81,13 +82,14 @@
 unsigned cpu_sr;
 char level1_int_disabled;
 
-/* Supervisor stack pointer entry. This is the "high water mark" of how far the
-   supervisor stack grew down before task started.
+/* Supervisor stack pointer entry. This is the "high water mark" of
+   how far the supervisor stack grew down before task started. Is zero
+   before the scheduler starts.
 
-   After tasks start, task stacks are all allocated from the heap and
-   FreeRTOS checks for stack overflow.
+ After the scheduler starts, task stacks are all allocated from the
+ heap and FreeRTOS checks for stack overflow.
 */
-static uint32_t xPortSupervisorStackPointer;
+void *xPortSupervisorStackPointer;
 
 /*
  * Stack initialization
@@ -178,9 +180,6 @@ void xPortSysTickHandle (void)
 	//OpenNMI();
 }
 
-static bool sdk_compat_initialised;
-void sdk_compat_initialise(void);
-
 /*
  * See header file for description.
  */
@@ -188,14 +187,6 @@ portBASE_TYPE xPortStartScheduler( void )
 {
     _xt_isr_attach(INUM_SOFT, SV_ISR);
     _xt_isr_unmask(BIT(INUM_SOFT));
-
-    /* ENORMOUS HACK: Call the sdk_compat_initialise() function.
-       This can be removed happily once we have open source startup code.
-    */
-    if(!sdk_compat_initialised) {
-        sdk_compat_initialised = true;
-        sdk_compat_initialise();
-    }
 
     /* Initialize system tick timer interrupt and schedule the first tick. */
     _xt_isr_attach(INUM_TICK, sdk__xt_timer_int);
@@ -229,9 +220,9 @@ size_t xPortGetFreeHeapSize( void )
     struct mallinfo mi = mallinfo();
     uint32_t brk_val = (uint32_t) sbrk(0);
 
-    uint32_t sp = xPortSupervisorStackPointer;
+    intptr_t sp = (intptr_t)xPortSupervisorStackPointer;
     if(sp == 0) /* scheduler not started */
-        __asm__ __volatile__ ("mov %0, a1\n" : "=a"(sp));
+        SP(sp);
     return sp - brk_val + mi.fordblks;
 }
 

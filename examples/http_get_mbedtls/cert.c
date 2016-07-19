@@ -1,39 +1,44 @@
-/* This is the root certificate for the CA trust chain of
+/* This is the CA certificate for the CA trust chain of
    www.howsmyssl.com in PEM format, as dumped via:
 
    openssl s_client -showcerts -connect www.howsmyssl.com:443 </dev/null
 
-   The root cert is the last cert in the chain output by the server.
+   The CA cert is the last cert in the chain output by the server.
 */
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 
+/*
+ 1 s:/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
+   i:/O=Digital Signature Trust Co./CN=DST Root CA X3
+ */
 const char *server_root_cert = "-----BEGIN CERTIFICATE-----\r\n"
-"MIIEWTCCA0GgAwIBAgIDAjpjMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT\r\n"
-"MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i\r\n"
-"YWwgQ0EwHhcNMTIwODI3MjA0MDQwWhcNMjIwNTIwMjA0MDQwWjBEMQswCQYDVQQG\r\n"
-"EwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjEdMBsGA1UEAxMUR2VvVHJ1c3Qg\r\n"
-"U1NMIENBIC0gRzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC5J/lP\r\n"
-"2Pa3FT+Pzc7WjRxr/X/aVCFOA9jK0HJSFbjJgltYeYT/JHJv8ml/vJbZmnrDPqnP\r\n"
-"UCITDoYZ2+hJ74vm1kfy/XNFCK6PrF62+J589xD/kkNm7xzU7qFGiBGJSXl6Jc5L\r\n"
-"avDXHHYaKTzJ5P0ehdzgMWUFRxasCgdLLnBeawanazpsrwUSxLIRJdY+lynwg2xX\r\n"
-"HNil78zs/dYS8T/bQLSuDxjTxa9Akl0HXk7+Yhc3iemLdCai7bgK52wVWzWQct3Y\r\n"
-"TSHUQCNcj+6AMRaraFX0DjtU6QRN8MxOgV7pb1JpTr6mFm1C9VH/4AtWPJhPc48O\r\n"
-"bxoj8cnI2d+87FLXAgMBAAGjggFUMIIBUDAfBgNVHSMEGDAWgBTAephojYn7qwVk\r\n"
-"DBF9qn1luMrMTjAdBgNVHQ4EFgQUEUrQcznVW2kIXLo9v2SaqIscVbwwEgYDVR0T\r\n"
-"AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAQYwOgYDVR0fBDMwMTAvoC2gK4Yp\r\n"
-"aHR0cDovL2NybC5nZW90cnVzdC5jb20vY3Jscy9ndGdsb2JhbC5jcmwwNAYIKwYB\r\n"
-"BQUHAQEEKDAmMCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5nZW90cnVzdC5jb20w\r\n"
-"TAYDVR0gBEUwQzBBBgpghkgBhvhFAQc2MDMwMQYIKwYBBQUHAgEWJWh0dHA6Ly93\r\n"
-"d3cuZ2VvdHJ1c3QuY29tL3Jlc291cmNlcy9jcHMwKgYDVR0RBCMwIaQfMB0xGzAZ\r\n"
-"BgNVBAMTElZlcmlTaWduTVBLSS0yLTI1NDANBgkqhkiG9w0BAQUFAAOCAQEAPOU9\r\n"
-"WhuiNyrjRs82lhg8e/GExVeGd0CdNfAS8HgY+yKk3phLeIHmTYbjkQ9C47ncoNb/\r\n"
-"qfixeZeZ0cNsQqWSlOBdDDMYJckrlVPg5akMfUf+f1ExRF73Kh41opQy98nuwLbG\r\n"
-"mqzemSFqI6A4ZO6jxIhzMjtQzr+t03UepvTp+UJrYLLdRf1dVwjOLVDmEjIWE4ry\r\n"
-"lKKbR6iGf9mY5ffldnRk2JG8hBYo2CVEMH6C2Kyx5MDkFWzbtiQnAioBEoW6MYhY\r\n"
-"R3TjuNJkpsMyWS4pS0XxW4lJLoKaxhgVRNAuZAEVaDj59vlmAwxVG52/AECu8Egn\r\n"
-"TOCAXi25KhV6vGb4NQ==\r\n"
+"MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/\r\n"
+"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\r\n"
+"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\r\n"
+"SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT\r\n"
+"GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC\r\n"
+"AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF\r\n"
+"q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8\r\n"
+"SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0\r\n"
+"Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA\r\n"
+"a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj\r\n"
+"/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T\r\n"
+"AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG\r\n"
+"CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv\r\n"
+"bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k\r\n"
+"c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw\r\n"
+"VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC\r\n"
+"ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz\r\n"
+"MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu\r\n"
+"Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF\r\n"
+"AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo\r\n"
+"uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/\r\n"
+"wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu\r\n"
+"X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG\r\n"
+"PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6\r\n"
+"KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==\r\n"
 "-----END CERTIFICATE-----\r\n";
 
 

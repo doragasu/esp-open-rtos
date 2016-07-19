@@ -13,9 +13,9 @@
 
 #define TESTSTRING "O hai there! %d %d %d"
 
-const char *dramtest = TESTSTRING;
-const __attribute__((section(".iram1.notrodata"))) char iramtest[] = TESTSTRING;
-const __attribute__((section(".text.notrodata"))) char iromtest[] = TESTSTRING;
+const RAM char dramtest[] = TESTSTRING;
+const char *iromtest = TESTSTRING;
+const IRAM_DATA char iramtest[] = TESTSTRING;
 
 static inline uint32_t get_ccount (void)
 {
@@ -305,7 +305,7 @@ static void test_system_interaction()
     }
     uint32_t ticks = xTaskGetTickCount() - start;
     printf("Timer interaction test PASSED after %dms.\n", ticks*portTICK_RATE_MS);
-    while(1) {}
+    abort();
 }
 
 /* The following "sanity tests" are designed to try to execute every code path
