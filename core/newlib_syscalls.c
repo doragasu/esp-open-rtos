@@ -43,18 +43,25 @@ IRAM caddr_t _sbrk_r (struct _reent *r, int incr)
 /* syscall implementation for stdio write to UART */
 long _write_r(struct _reent *r, int fd, const char *ptr, int len )
 {
-    if(fd != r->_stdout->_file) {
+	// Raise EBADF if not using any of the UARTs
+    if((fd != 0) && (fd != 1)) {
         r->_errno = EBADF;
         return -1;
     }
-    for(int i = 0; i < len; i++) {
-        /* Auto convert CR to CRLF, ignore other LFs (compatible with Espressif SDK behaviour) */
-        if(ptr[i] == '\r')
-            continue;
-        if(ptr[i] == '\n')
-            uart_putc(PRINT_UART, '\r');
-        uart_putc(PRINT_UART, ptr[i]);
-    }
+	// Auto convert CR to CRLF if using PRINT_UART, send raw data otherwise
+	if (PRINT_UART == fd) {
+	    for(int i = 0; i < len; i++) {
+	        if(ptr[i] == '\r')
+	            continue;
+	        if(ptr[i] == '\n')
+	            uart_putc(fd, '\r');
+	        uart_putc(fd, ptr[i]);
+		}
+	} else {
+	    for(int i = 0; i < len; i++) {
+	        uart_putc(fd, ptr[i]);
+	    }
+	}
     return len;
 }
 
